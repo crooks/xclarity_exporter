@@ -1,0 +1,9 @@
+# Ignore the generated binary file
+xclarity_exporter
+
+# Ignore json files, they're used for testing and could be sensitive
+*.json
+
+# Tar and Gzip files
+*.gz
+*.tar
