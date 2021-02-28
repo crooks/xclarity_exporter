@@ -27,16 +27,18 @@ var health = map[string]int{
 	"Major-Failure": 3,
 }
 
-func (s *authClient) getJSON(url, tlj string) gjson.Result {
+// getJSON expects a URL and a top-level json dict name to scrape.  It returns
+// that dict name as a gjson object.
+func (s *authClient) getJSON(url, tlj string) (gjson.Result, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Fatalf("Request error: %v\n", err)
+		return gjson.Result{}, fmt.Errorf("request error: %v", err)
 	}
 	bytes, err := s.doRequest(req)
 	if err != nil {
-		log.Fatalf("Node request error: %v\n", err)
+		return gjson.Result{}, fmt.Errorf("node request error: %v", err)
 	}
-	return gjson.GetBytes(bytes, tlj)
+	return gjson.GetBytes(bytes, tlj), nil
 }
 
 // nodeParser parses the json output from the XClarity API (https://<xclarity_server>/nodes)
@@ -55,8 +57,9 @@ func nodeParser(j gjson.Result) {
 // chassis instance
 func chassisSwitchParser(j gjson.Result, instance string) {
 	for _, sw := range j.Array() {
-		if sw.Get("type").String() != "Switch" {
-			fmt.Println(sw.Get("type").String())
+		swType := sw.Get("type").String()
+		if swType != "Switch" {
+			log.Printf("Unexpected Switch type: %s", swType)
 			continue
 		}
 		switchName := strings.ToLower(sw.Get("deviceName").String())
@@ -72,8 +75,9 @@ func chassisSwitchParser(j gjson.Result, instance string) {
 // from the list item number.
 func chassisPSUParser(j gjson.Result, instance string) {
 	for n, ps := range j.Array() {
-		if ps.Get("type").String() != "PowerSupply" {
-			fmt.Println(ps.Get("type").String())
+		psType := ps.Get("type").String()
+		if psType != "PowerSupply" {
+			log.Printf("Unexpected Power Supply type: %s", psType)
 			continue
 		}
 		healthCode, ok := health[ps.Get("excludedHealthState").String()]

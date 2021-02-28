@@ -60,13 +60,30 @@ func parseFlags() {
 	return
 }
 
-func parser() {
+// parser is the main loop that endlessly fetches URLs and parses them into
+// Prometheus metrics
+func parser(loop bool) {
 	chassisURL := fmt.Sprintf("%s/chassis", cfg.API.BaseURL)
 	nodeURL := fmt.Sprintf("%s/nodes", cfg.API.BaseURL)
 	client := newBasicAuthClient(cfg.Authentication.Username, cfg.Authentication.Password)
 	for {
-		chassisParser(client.getJSON(chassisURL, "chassisList"))
-		nodeParser(client.getJSON(nodeURL, "nodeList"))
+		j, err := client.getJSON(chassisURL, "chassisList")
+		// Failing to fetch a URL shouldn't be fatal.  Skip this parsing cycle and carry on.
+		if err != nil {
+			log.Printf("Parsing %s returned: %v", chassisURL, err)
+		} else {
+			chassisParser(j)
+		}
+		j, err = client.getJSON(nodeURL, "nodeList")
+		if err != nil {
+			log.Printf("Parsing %s returned: %v", nodeURL, err)
+		} else {
+			nodeParser(j)
+		}
+		// Bail out if not configured to loop.  This is useful for testing.
+		if !loop {
+			break
+		}
 		// Sleep for a configured duration
 		time.Sleep(cfg.API.Interval * time.Second)
 	} // Endless loop
@@ -79,7 +96,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Unable to parse config file: %v", err)
 	}
-	go parser()
+	// If loop is true, the parser will loop endlessly
+	loop := true
+	go parser(loop)
 	http.Handle("/metrics", promhttp.Handler())
 	exporter := fmt.Sprintf("%s:%s", cfg.Exporter.Address, cfg.Exporter.Port)
 	http.ListenAndServe(exporter, nil)
