@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"strconv"
 	"strings"
 
@@ -26,10 +27,20 @@ var health = map[string]int{
 	"Major-Failure": 3,
 }
 
+func (s *authClient) getJSON(url, tlj string) gjson.Result {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Fatalf("Request error: %v\n", err)
+	}
+	bytes, err := s.doRequest(req)
+	if err != nil {
+		log.Fatalf("Node request error: %v\n", err)
+	}
+	return gjson.GetBytes(bytes, tlj)
+}
+
 // nodeParser parses the json output from the XClarity API (https://<xclarity_server>/nodes)
-func nodeParser() {
-	//j := gjson.ParseBytes(parseFile("full.json"))
-	j := gjson.GetBytes(parseFile("full.json"), "nodeList")
+func nodeParser(j gjson.Result) {
 	for _, jn := range j.Array() {
 		instance := strings.ToLower(jn.Get("name").String())
 		healthCode, ok := health[jn.Get("overallHealthState").String()]
@@ -73,8 +84,7 @@ func chassisPSUParser(j gjson.Result, instance string) {
 }
 
 // chassisParser parses the json output from the XClarity API (https://<xclarity_server>/chassis)
-func chassisParser() {
-	j := gjson.GetBytes(parseFile("chassis_clean.json"), "chassisList")
+func chassisParser(j gjson.Result) {
 	// Iterate through the list of Flex chassis
 	for _, jn := range j.Array() {
 		// The user-defined chassis name is used to populate the instance label

@@ -1,0 +1,12 @@
+# xclarity_exporter.yml
+
+api:
+  base_url: http://127.0.0.1:8080
+  interval: 120
+authentication:
+  username: apiauthuser
+  password: apiauthpassword
+  certfile: /etc/pki/tls/certs/rootcrt.pem
+exporter:
+  address: 127.0.0.1
+  port: 9794
