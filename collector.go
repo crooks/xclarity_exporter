@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -11,15 +10,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-func parseFile(filename string) []byte {
-	b, err := ioutil.ReadFile(filename)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return b
-}
-
+// health is a mapping of textual XClarity health states to a numeric metric
 var health = map[string]int{
 	"Normal":        0,
 	"Warning":       1,

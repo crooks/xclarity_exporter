@@ -8,6 +8,7 @@ import (
 	"testing"
 )
 
+// webserv starts a HTTP listener to test API scraping
 func webserv() {
 	fs := http.FileServer(http.Dir("./testdata"))
 	http.Handle("/", fs)
@@ -20,12 +21,14 @@ func webserv() {
 	}
 }
 
+// strEquality compares two strings and fails if they don't match
 func strEquality(t *testing.T, wanted, got string) {
 	if wanted != got {
 		t.Fatalf("Failed string equality test.  Wanted=%s, Got=%s", wanted, got)
 	}
 }
 
+// intEquality compares two integers and fails if they don't match
 func intEquality(t *testing.T, wanted, got int) {
 	if wanted != got {
 		t.Fatalf("Failed integer equality test.  Wanted=%d, Got=%d", wanted, got)

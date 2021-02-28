@@ -20,7 +20,7 @@ type authClient struct {
 	HTTPClient *http.Client
 }
 
-//
+// newBasicAuthClient returns an instance of authClient
 func newBasicAuthClient(username, password string) *authClient {
 	return &authClient{
 		Username:   username,
@@ -29,6 +29,9 @@ func newBasicAuthClient(username, password string) *authClient {
 	}
 }
 
+// httpAuthClient creates a new instance of http.Client with support for
+// additional rootCAs.  As XClarity is frequently installed as an appliance,
+// with a self-signed cert, this appears to be quite useful.
 func httpAuthClient() *http.Client {
 	rootCAs, err := x509.SystemCertPool()
 	if err != nil {
@@ -51,6 +54,7 @@ func httpAuthClient() *http.Client {
 	return &http.Client{Transport: tr}
 }
 
+// doRequest does an HTTP URL request and returns it as a byte array
 func (s *authClient) doRequest(req *http.Request) ([]byte, error) {
 	req.SetBasicAuth(s.Username, s.Password)
 	resp, err := s.HTTPClient.Do(req)
