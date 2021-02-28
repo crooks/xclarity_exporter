@@ -44,12 +44,12 @@ func (s *authClient) getJSON(url, tlj string) (gjson.Result, error) {
 // nodeParser parses the json output from the XClarity API (https://<xclarity_server>/nodes)
 func nodeParser(j gjson.Result) {
 	for _, jn := range j.Array() {
-		instance := strings.ToLower(jn.Get("name").String())
+		node := strings.ToLower(jn.Get("name").String())
 		healthCode, ok := health[jn.Get("overallHealthState").String()]
 		if ok {
-			nodeHealth.WithLabelValues(instance).Set(float64(healthCode))
+			nodeHealth.WithLabelValues(node).Set(float64(healthCode))
 		}
-		nodePower.WithLabelValues(instance).Set(jn.Get("powerStatus").Float())
+		nodePower.WithLabelValues(node).Set(jn.Get("powerStatus").Float())
 	}
 }
 
@@ -93,13 +93,13 @@ func chassisParser(j gjson.Result) {
 	for _, jn := range j.Array() {
 		// The user-defined chassis name is used to populate the instance label
 		// of all metrics associated with this list item.
-		instance := strings.ToLower(jn.Get("userDefinedName").String())
+		chassis := strings.ToLower(jn.Get("userDefinedName").String())
 		// Power resources are defined at the top-level of each list item
-		chassisPowerFree.WithLabelValues(instance).Set(jn.Get("powerAllocation.remainingOutputPower").Float())
-		chassisPowerTotal.WithLabelValues(instance).Set(jn.Get("powerAllocation.totalOutputPower").Float())
-		chassisPowerUsed.WithLabelValues(instance).Set(jn.Get("powerAllocation.allocatedOutputPower").Float())
+		chassisPowerFree.WithLabelValues(chassis).Set(jn.Get("powerAllocation.remainingOutputPower").Float())
+		chassisPowerTotal.WithLabelValues(chassis).Set(jn.Get("powerAllocation.totalOutputPower").Float())
+		chassisPowerUsed.WithLabelValues(chassis).Set(jn.Get("powerAllocation.allocatedOutputPower").Float())
 		// switches and PSUs are lists within each chassis instance
-		chassisSwitchParser(jn.Get("switches"), instance)
-		chassisPSUParser(jn.Get("powerSupplies"), instance)
+		chassisSwitchParser(jn.Get("switches"), chassis)
+		chassisPSUParser(jn.Get("powerSupplies"), chassis)
 	}
 }

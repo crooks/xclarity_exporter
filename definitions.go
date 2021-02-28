@@ -11,14 +11,14 @@ var (
 			Name: "xclarity_server_health",
 			Help: "XClarity server health (0=Good)",
 		},
-		[]string{"instance"},
+		[]string{"node"},
 	)
 	nodePower = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "xclarity_server_power",
 			Help: "XClarity server power status",
 		},
-		[]string{"instance"},
+		[]string{"node"},
 	)
 	// Chassis definitions
 	chassisPowerFree = prometheus.NewGaugeVec(
@@ -26,35 +26,35 @@ var (
 			Name: "xclarity_chassis_power_free",
 			Help: "Chassis power unused",
 		},
-		[]string{"instance"},
+		[]string{"chassis"},
 	)
 	chassisPowerTotal = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "xclarity_chassis_power_total",
 			Help: "Chassis power total",
 		},
-		[]string{"instance"},
+		[]string{"chassis"},
 	)
 	chassisPowerUsed = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "xclarity_chassis_power_used",
 			Help: "Chassis power consumed",
 		},
-		[]string{"instance"},
+		[]string{"chassis"},
 	)
 	chassisSwitchHealth = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "xclarity_chassis_switch_health",
 			Help: "Switch overall health (0=Good)",
 		},
-		[]string{"instance", "switch"},
+		[]string{"chassis", "switch"},
 	)
 	chassisPSUHealth = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "xclarity_chassis_psu_health",
 			Help: "PSU health (0=Good)",
 		},
-		[]string{"instance", "psu"},
+		[]string{"chassis", "psu"},
 	)
 )
 
