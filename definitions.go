@@ -9,7 +9,7 @@ var (
 	nodeHealth = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "xclarity_server_health",
-			Help: "XClarity server health (0=Good)",
+			Help: "XClarity server health (1=Good)",
 		},
 		[]string{"node"},
 	)
@@ -21,6 +21,13 @@ var (
 		[]string{"node"},
 	)
 	// Chassis definitions
+	chassisCMMHealth = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "xclarity_chassis_cmm_health",
+			Help: "Xclarity CMM health status",
+		},
+		[]string{"chassis"},
+	)
 	chassisPowerFree = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "xclarity_chassis_power_free",
@@ -42,19 +49,26 @@ var (
 		},
 		[]string{"chassis"},
 	)
-	chassisSwitchHealth = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "xclarity_chassis_switch_health",
-			Help: "Switch overall health (0=Good)",
-		},
-		[]string{"chassis", "switch"},
-	)
 	chassisPSUHealth = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "xclarity_chassis_psu_health",
-			Help: "PSU health (0=Good)",
+			Help: "PSU health (1=Good)",
 		},
 		[]string{"chassis", "psu"},
+	)
+	chassisSwitchHealth = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "xclarity_chassis_switch_health",
+			Help: "Switch overall health (1=Good)",
+		},
+		[]string{"chassis", "switch"},
+	)
+	chassisPowerMode = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "xclarity_chassis_power_mode",
+			Help: "Chassis power redundancy mode",
+		},
+		[]string{"chassis"},
 	)
 )
 
@@ -63,9 +77,11 @@ func init() {
 	prometheus.MustRegister(nodeHealth)
 	prometheus.MustRegister(nodePower)
 	// chassis metrics
+	prometheus.MustRegister(chassisCMMHealth)
 	prometheus.MustRegister(chassisPowerFree)
+	prometheus.MustRegister(chassisPowerMode)
 	prometheus.MustRegister(chassisPowerTotal)
 	prometheus.MustRegister(chassisPowerUsed)
-	prometheus.MustRegister(chassisSwitchHealth)
 	prometheus.MustRegister(chassisPSUHealth)
+	prometheus.MustRegister(chassisSwitchHealth)
 }

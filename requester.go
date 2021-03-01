@@ -66,7 +66,6 @@ func (s *authClient) doRequest(req *http.Request) ([]byte, error) {
 	if err != nil {
 		log.Fatalf("Response error: %v\n", err)
 	}
-	log.Printf("Reg: %s%s", req.Host, req.URL.Path)
 	if resp.StatusCode != 200 {
 		log.Fatalf("Status error: %s\n", string(body))
 	}

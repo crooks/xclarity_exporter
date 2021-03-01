@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -52,38 +51,6 @@ func TestCfg(t *testing.T) {
 	strEquality(t, "/etc/pki/tls/certs/rootcrt.pem", cfg.Authentication.CertFile)
 	strEquality(t, "127.0.0.1", cfg.Exporter.Address)
 	strEquality(t, "9794", cfg.Exporter.Port)
-}
-
-func TestNode(t *testing.T) {
-	var err error
-	cfg, err = newConfig("xclarity_exporter.yml")
-	if err != nil {
-		t.Fatalf("Unable to parse config file: %v", err)
-	}
-	go webserv()
-	url := fmt.Sprintf("%s/chassis", cfg.API.BaseURL)
-	client := newBasicAuthClient(cfg.Authentication.Username, cfg.Authentication.Password)
-	j, err := client.getJSON(url, "chassisList")
-	if err != nil {
-		t.Fatal(err)
-	}
-	nodeParser(j)
-}
-
-func TestChassis(t *testing.T) {
-	var err error
-	cfg, err = newConfig("xclarity_exporter.yml")
-	if err != nil {
-		log.Fatalf("Unable to parse config file: %v", err)
-	}
-	go webserv()
-	url := fmt.Sprintf("%s/chassis", cfg.API.BaseURL)
-	client := newBasicAuthClient(cfg.Authentication.Username, cfg.Authentication.Password)
-	j, err := client.getJSON(url, "chassisList")
-	if err != nil {
-		t.Fatal(err)
-	}
-	chassisParser(j)
 }
 
 func TestParser(t *testing.T) {

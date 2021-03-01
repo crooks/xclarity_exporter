@@ -12,10 +12,14 @@ import (
 
 // health is a mapping of textual XClarity health states to a numeric metric
 var health = map[string]int{
-	"Normal":        0,
-	"Warning":       1,
-	"Critical":      2,
-	"Major-Failure": 3,
+	"Unknown":         0,
+	"Normal":          1,
+	"Non-Critical":    2,
+	"Warning":         3,
+	"Minor-Failure":   4,
+	"Major-Failure":   5,
+	"Non-Recoverable": 6,
+	"Critical":        7,
 }
 
 // getJSON expects a URL and a top-level json dict name to scrape.  It returns
@@ -71,7 +75,7 @@ func chassisPSUParser(j gjson.Result, instance string) {
 			log.Printf("Unexpected Power Supply type: %s", psType)
 			continue
 		}
-		healthCode, ok := health[ps.Get("excludedHealthState").String()]
+		healthCode, ok := health[ps.Get("overallHealthState").String()]
 		if ok {
 			chassisPSUHealth.WithLabelValues(instance, strconv.Itoa(n)).Set(float64(healthCode))
 		}
@@ -85,10 +89,17 @@ func chassisParser(j gjson.Result) {
 		// The user-defined chassis name is used to populate the instance label
 		// of all metrics associated with this list item.
 		chassis := strings.ToLower(jn.Get("userDefinedName").String())
+		// cmmHealthState occurs all over the place.  This is the top-level
+		// chassis CMM health.
+		cmmHealth, ok := health[jn.Get("cmmHealthState").String()]
+		if ok {
+			chassisCMMHealth.WithLabelValues(chassis).Set(float64(cmmHealth))
+		}
 		// Power resources are defined at the top-level of each list item
 		chassisPowerFree.WithLabelValues(chassis).Set(jn.Get("powerAllocation.remainingOutputPower").Float())
 		chassisPowerTotal.WithLabelValues(chassis).Set(jn.Get("powerAllocation.totalOutputPower").Float())
 		chassisPowerUsed.WithLabelValues(chassis).Set(jn.Get("powerAllocation.allocatedOutputPower").Float())
+		chassisPowerMode.WithLabelValues(chassis).Set(jn.Get("energyPolicies.powerRedundancyMode").Float())
 		// switches and PSUs are lists within each chassis instance
 		chassisSwitchParser(jn.Get("switches"), chassis)
 		chassisPSUParser(jn.Get("powerSupplies"), chassis)
